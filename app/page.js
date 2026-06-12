@@ -1,13 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from '../components/AuthProvider'
-import SignIn       from '../components/SignIn'
-import Topbar       from '../components/Topbar'
-import Browse       from '../components/Browse'
-import PostRide     from '../components/PostRide'
-import Messages     from '../components/Messages'
-import Alerts       from '../components/Alerts'
-import MyRides      from '../components/MyRides'
+import SignIn     from '../components/SignIn'
+import Topbar     from '../components/Topbar'
+import Browse     from '../components/Browse'
+import PostRide   from '../components/PostRide'
+import Messages   from '../components/Messages'
+import Alerts     from '../components/Alerts'
+import MyRides    from '../components/MyRides'
+import Locations  from '../components/Locations'
 import { subscribeRides, subscribeAlerts } from '../lib/firebase'
 
 export default function RootPage() {
@@ -20,8 +21,6 @@ export default function RootPage() {
 
 function App() {
   const user = useAuth()
-
-  // Loading state
   if (user === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
@@ -32,23 +31,19 @@ function App() {
       </div>
     )
   }
-
   if (!user) return <SignIn />
-
   return <Dashboard user={user} />
 }
 
 function Dashboard({ user }) {
-  const [tab, setTab]               = useState('browse')
-  const [rides, setRides]           = useState([])
-  const [alerts, setAlerts]         = useState([])
-  const [notifications, setNotifs]  = useState([])
-  const [messageRide, setMessageRide] = useState(null) // ride to open chat for
+  const [tab, setTab]                 = useState('browse')
+  const [rides, setRides]             = useState([])
+  const [alerts, setAlerts]           = useState([])
+  const [notifications, setNotifs]    = useState([])
+  const [messageRide, setMessageRide] = useState(null)
 
-  // Subscribe to all rides
   useEffect(() => {
     const unsub = subscribeRides((newRides) => {
-      // Check new rides against alerts for notifications
       setRides(prev => {
         const prevIds = new Set(prev.map(r => r.id))
         newRides.forEach(r => {
@@ -62,7 +57,6 @@ function Dashboard({ user }) {
     return unsub
   }, [user.email])
 
-  // Subscribe to user's alerts
   useEffect(() => {
     const unsub = subscribeAlerts(user.email, setAlerts)
     return unsub
@@ -93,19 +87,18 @@ function Dashboard({ user }) {
     setTab('messages')
   }
 
-  // Badge counts
-  const unreadMessages  = 0  // extend: track unread per convo
   const pendingRequests = rides
     .filter(r => r.posterEmail === user.email)
     .reduce((s, r) => s + (r.pendingCount ?? 0), 0)
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Global notification banners */}
+      {/* Notification banners */}
       {notifications.length > 0 && (
-        <div className="fixed top-0 left-0 right-0 z-50 flex flex-col gap-1 p-3">
+        <div className="fixed top-12 sm:top-0 left-0 right-0 z-50 flex flex-col gap-1 p-3 pointer-events-none">
           {notifications.map(n => (
-            <div key={n.id} className="flex items-center gap-3 bg-brand-light border border-green-300 rounded-xl px-4 py-3 shadow-sm max-w-xl mx-auto w-full">
+            <div key={n.id}
+              className="flex items-center gap-3 bg-brand-light border border-green-300 rounded-xl px-4 py-3 shadow-sm max-w-xl mx-auto w-full pointer-events-auto">
               <span className="text-brand text-base">🔔</span>
               <p className="flex-1 text-sm text-brand-dark">{n.msg}</p>
               <button onClick={() => dismissNotif(n.id)} className="text-brand-dark opacity-60 hover:opacity-100 text-sm">✕</button>
@@ -118,17 +111,19 @@ function Dashboard({ user }) {
         user={user}
         tab={tab}
         setTab={setTab}
-        unreadMessages={unreadMessages}
+        unreadMessages={0}
         pendingRequests={pendingRequests}
         alertCount={notifications.length}
       />
 
-      <main className={notifications.length > 0 ? 'pt-16' : ''}>
-        {tab === 'browse'    && <Browse    rides={rides} user={user} onMessage={handleMessage} />}
-        {tab === 'post'      && <PostRide  user={user} onSuccess={() => setTab('browse')} />}
-        {tab === 'messages'  && <Messages  user={user} initialRide={messageRide} />}
-        {tab === 'alerts'    && <Alerts    user={user} notifications={notifications} onDismiss={dismissNotif} />}
-        {tab === 'my'        && <MyRides   rides={rides} user={user} />}
+      {/* Main content — extra bottom padding on mobile for bottom nav */}
+      <main className="pb-20 sm:pb-0">
+        {tab === 'browse'    && <Browse     rides={rides} user={user} onMessage={handleMessage} />}
+        {tab === 'post'      && <PostRide   user={user} onSuccess={() => setTab('browse')} />}
+        {tab === 'messages'  && <Messages   user={user} initialRide={messageRide} />}
+        {tab === 'alerts'    && <Alerts     user={user} notifications={notifications} onDismiss={dismissNotif} />}
+        {tab === 'my'        && <MyRides    rides={rides} user={user} />}
+        {tab === 'locations' && <Locations  user={user} />}
       </main>
     </div>
   )

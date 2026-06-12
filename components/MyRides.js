@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import {
   subscribeRequests, updateRequestStatus, deleteRide,
-} from '../lib/firebase'
+} from '@/lib/firebase'
 import { format } from 'date-fns'
 
 export default function MyRides({ rides, user }) {

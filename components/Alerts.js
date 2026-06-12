@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { saveAlert, subscribeAlerts, deleteAlert } from '../lib/firebase'
+import { saveAlert, subscribeAlerts, deleteAlert } from '@/lib/firebase'
 
 export default function Alerts({ user, notifications, onDismiss }) {
   const [alerts, setAlerts]     = useState([])

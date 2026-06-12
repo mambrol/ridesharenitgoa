@@ -49,3 +49,18 @@
   .status-rejected { @apply bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded-full; }
   .status-pending  { @apply bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded-full; }
 }
+
+/* Mobile safe area for bottom nav */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
