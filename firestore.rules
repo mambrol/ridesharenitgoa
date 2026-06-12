@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only @nitgoa.ac.in accounts can read/write anything
+    function isNITGoa() {
+      return request.auth != null
+        && request.auth.token.email.matches('.*@nitgoa\\.ac\\.in');
+    }
+
+    // Rides — anyone at NIT Goa can read; only owner can delete
+    match /rides/{rideId} {
+      allow read: if isNITGoa();
+      allow create: if isNITGoa()
+        && request.resource.data.posterEmail == request.auth.token.email;
+      allow delete: if isNITGoa()
+        && resource.data.posterEmail == request.auth.token.email;
+      allow update: if isNITGoa();
+
+      // Seat requests — any NIT Goa member can create their own
+      match /requests/{requestId} {
+        allow read: if isNITGoa();
+        allow create: if isNITGoa()
+          && request.resource.data.requesterEmail == request.auth.token.email;
+        // Only the ride owner can update status
+        allow update: if isNITGoa()
+          && get(/databases/$(database)/documents/rides/$(rideId)).data.posterEmail
+             == request.auth.token.email;
+      }
+    }
+
+    // Conversations — only participants can read/write
+    match /conversations/{convoId} {
+      allow read, write: if isNITGoa()
+        && request.auth.token.email in resource.data.participants;
+      allow create: if isNITGoa();
+
+      match /messages/{msgId} {
+        allow read: if isNITGoa();
+        allow create: if isNITGoa()
+          && request.resource.data.from == request.auth.token.email;
+      }
+    }
+
+    // User alerts — private to each user
+    match /users/{userEmail}/alerts/{alertId} {
+      allow read, write: if isNITGoa()
+        && request.auth.token.email == userEmail;
+    }
+  }
+}

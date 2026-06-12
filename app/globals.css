@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand text-white px-4 py-2 rounded-lg text-sm font-medium
+           hover:opacity-90 active:scale-95 transition-all
+           flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply border border-gray-200 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm
+           hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-2;
+  }
+  .btn-success {
+    @apply border border-green-300 text-green-700 px-3 py-1 rounded-lg text-xs
+           hover:bg-green-50 transition-colors;
+  }
+  .btn-danger {
+    @apply border border-red-300 text-red-600 px-3 py-1 rounded-lg text-xs
+           hover:bg-red-50 transition-colors;
+  }
+  .inp {
+    @apply w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
+           focus:outline-none focus:border-brand bg-white transition-colors;
+  }
+  .card {
+    @apply bg-white border border-gray-100 rounded-xl p-4;
+  }
+  .badge-car {
+    @apply bg-brand-light text-brand-dark text-xs px-2 py-0.5 rounded-full font-medium;
+  }
+  .badge-bike {
+    @apply bg-purple-50 text-purple-800 text-xs px-2 py-0.5 rounded-full font-medium;
+  }
+  .badge-free {
+    @apply bg-green-50 text-green-800 text-xs px-2 py-0.5 rounded-full;
+  }
+  .badge-paid {
+    @apply bg-amber-50 text-amber-800 text-xs px-2 py-0.5 rounded-full;
+  }
+  .status-accepted { @apply bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full; }
+  .status-rejected { @apply bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded-full; }
+  .status-pending  { @apply bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded-full; }
+}
