@@ -14,7 +14,7 @@ export function isAdmin(email) {
   return ADMIN_EMAILS.includes(email)
 }
 
-export default function Admin({ user }) {
+export default function Admin({ user, onExitAdmin }) {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [rides, setRides]         = useState([])
   const [users, setUsers]         = useState([])
@@ -142,12 +142,20 @@ export default function Admin({ user }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Admin topbar */}
-      <div className="bg-gray-900 text-white px-5 py-3 flex items-center justify-between sticky top-0 z-20">
+    <div className="bg-gray-900 text-white px-5 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <span className="text-lg">🛡️</span>
           <span className="font-medium text-sm">NIT Goa RideShare — Admin</span>
         </div>
-        <span className="text-xs text-gray-400">{user.email}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400 hidden sm:block">{user.email}</span>
+          <button
+            onClick={onExitAdmin}
+            className="text-xs bg-brand text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5"
+          >
+            👤 Switch to User view
+          </button>
+        </div>
       </div>
 
       <div className="flex max-w-5xl mx-auto">
