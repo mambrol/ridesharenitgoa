@@ -9,6 +9,7 @@ import Messages   from '../components/Messages'
 import Alerts     from '../components/Alerts'
 import MyRides    from '../components/MyRides'
 import Locations  from '../components/Locations'
+import Admin, { isAdmin } from '../components/Admin'
 import { subscribeRides, subscribeAlerts } from '../lib/firebase'
 
 export default function RootPage() {
@@ -36,6 +37,7 @@ function App() {
 }
 
 function Dashboard({ user }) {
+  if (isAdmin(user.email)) return <Admin user={user} />
   const [tab, setTab]                 = useState('browse')
   const [rides, setRides]             = useState([])
   const [alerts, setAlerts]           = useState([])
