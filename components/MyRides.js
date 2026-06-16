@@ -1,12 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
-import {
-  subscribeRequests, updateRequestStatus, deleteRide,
-} from '@/lib/firebase'
+import { subscribeRequests, updateRequestStatus, deleteRide } from '../lib/firebase'
 import { format } from 'date-fns'
 
 export default function MyRides({ rides, user }) {
-  const myRides    = rides.filter(r => r.posterEmail === user.email)
+  const myRides = rides.filter(r => r.posterEmail === user.email)
 
   function fmtDate(d, t) {
     try { return format(new Date(`${d}T${t}`), 'EEE d MMM · h:mm a') }
@@ -14,9 +12,7 @@ export default function MyRides({ rides, user }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5">
-
-      {/* Rides I posted */}
+    <div className="max-w-2xl mx-auto px-4 py-5 pb-24 sm:pb-5">
       <h2 className="text-sm font-medium text-gray-900 mb-3">Rides I posted</h2>
 
       {myRides.length === 0 && (
@@ -30,7 +26,6 @@ export default function MyRides({ rides, user }) {
         <RideWithRequests key={ride.id} ride={ride} user={user} fmtDate={fmtDate} />
       ))}
 
-      {/* Rides I requested */}
       <h2 className="text-sm font-medium text-gray-900 mb-3 mt-6">Rides I've requested</h2>
       <RequestedRides rides={rides} user={user} fmtDate={fmtDate} />
     </div>
@@ -57,24 +52,30 @@ function RideWithRequests({ ride, user, fmtDate }) {
   }
 
   const free = ride.totalSeats - (ride.takenSeats ?? 0)
+  const isExpired = (() => {
+    try { return new Date(`${ride.date}T${ride.time}`) < new Date() }
+    catch { return false }
+  })()
 
   return (
-    <div className="card mb-3">
+    <div className={`card mb-3 ${isExpired ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between mb-2">
         <div>
-          <p className="text-sm font-medium text-gray-900">{ride.from} → {ride.to}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-gray-900">{ride.from} → {ride.to}</p>
+            {isExpired && (
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Expired</span>
+            )}
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">{fmtDate(ride.date, ride.time)}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className={`text-xs px-2 py-0.5 rounded-full ${free > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
             {free > 0 ? `${free} free` : 'Full'}
           </span>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-          >
-            Delete
+          <button onClick={handleDelete} disabled={deleting}
+            className="text-xs text-red-400 hover:text-red-600 transition-colors">
+            {deleting ? '…' : 'Delete'}
           </button>
         </div>
       </div>
@@ -98,18 +99,8 @@ function RideWithRequests({ ride, user, fmtDate }) {
                 </div>
                 {req.status === 'pending' ? (
                   <div className="flex gap-1.5">
-                    <button
-                      className="btn-success"
-                      onClick={() => handleStatus(req.id, 'accepted')}
-                    >
-                      ✓ Accept
-                    </button>
-                    <button
-                      className="btn-danger"
-                      onClick={() => handleStatus(req.id, 'rejected')}
-                    >
-                      ✕ Reject
-                    </button>
+                    <button className="btn-success" onClick={() => handleStatus(req.id, 'accepted')}>✓ Accept</button>
+                    <button className="btn-danger"  onClick={() => handleStatus(req.id, 'rejected')}>✕ Reject</button>
                   </div>
                 ) : (
                   <span className={`status-${req.status}`}>{req.status}</span>
@@ -124,7 +115,6 @@ function RideWithRequests({ ride, user, fmtDate }) {
 }
 
 function RequestedRides({ rides, user, fmtDate }) {
-  // Find all rides where user has a request
   const [allRequests, setAllRequests] = useState({})
 
   useEffect(() => {
@@ -152,36 +142,41 @@ function RequestedRides({ rides, user, fmtDate }) {
 
   return (
     <div className="flex flex-col gap-3">
-      {myBookings.map(({ req, ride }) => (
-        <div key={ride.id} className="card">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className="text-sm font-medium text-gray-900">{ride.from} → {ride.to}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{fmtDate(ride.date, ride.time)}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Driver: {ride.posterName}</p>
+      {myBookings.map(({ req, ride }) => {
+        const isExpired = (() => {
+          try { return new Date(`${ride.date}T${ride.time}`) < new Date() }
+          catch { return false }
+        })()
+        return (
+          <div key={ride.id} className={`card ${isExpired ? 'opacity-60' : ''}`}>
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-gray-900">{ride.from} → {ride.to}</p>
+                  {isExpired && (
+                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Expired</span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">{fmtDate(ride.date, ride.time)}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Driver: {ride.posterName}</p>
+              </div>
+              <span className={`status-${req.status}`}>{req.status}</span>
             </div>
-            <span className={`status-${req.status}`}>{req.status}</span>
+            {req.status === 'accepted' && (
+              <div className="flex items-center gap-2 bg-green-50 rounded-lg px-3 py-2 mt-1">
+                <span className="text-sm">✉️</span>
+                <p className="text-xs text-green-800">Driver email: <strong>{ride.posterEmail}</strong></p>
+              </div>
+            )}
+            {req.status === 'rejected' && (
+              <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mt-1">Your request was rejected.</p>
+            )}
+            {req.status === 'pending' && (
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mt-1">Waiting for driver confirmation…</p>
+            )}
           </div>
-          {req.status === 'accepted' && (
-            <div className="flex items-center gap-2 bg-green-50 rounded-lg px-3 py-2 mt-1">
-              <span className="text-sm">✉️</span>
-              <p className="text-xs text-green-800">
-                Driver email: <strong>{ride.posterEmail}</strong>
-              </p>
-            </div>
-          )}
-          {req.status === 'rejected' && (
-            <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mt-1">
-              Your request was rejected.
-            </p>
-          )}
-          {req.status === 'pending' && (
-            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mt-1">
-              Waiting for driver confirmation…
-            </p>
-          )}
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
