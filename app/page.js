@@ -37,8 +37,13 @@ function App() {
 }
 
 function Dashboard({ user }) {
-  if (isAdmin(user.email)) return <Admin user={user} />
-  const [tab, setTab]                 = useState('browse')
+  const [adminMode, setAdminMode] = useState(true)
+
+  if (isAdmin(user.email) && adminMode) {
+    return <Admin user={user} onExitAdmin={() => setAdminMode(false)} />
+  }
+
+  const [tab, setTab] = useState('browse')
   const [rides, setRides]             = useState([])
   const [alerts, setAlerts]           = useState([])
   const [notifications, setNotifs]    = useState([])
