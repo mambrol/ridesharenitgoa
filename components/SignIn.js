@@ -1,5 +1,5 @@
 'use client'
-import { signInWithGoogle } from '@/lib/firebase'
+import { signInWithGoogle } from '../lib/firebase'
 import { useState } from 'react'
 
 export default function SignIn() {
