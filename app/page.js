@@ -37,17 +37,12 @@ function App() {
 }
 
 function Dashboard({ user }) {
-  const [adminMode, setAdminMode] = useState(true)
-
-  if (isAdmin(user.email) && adminMode) {
-    return <Admin user={user} onExitAdmin={() => setAdminMode(false)} />
-  }
-
-  const [tab, setTab] = useState('browse')
-  const [rides, setRides]             = useState([])
-  const [alerts, setAlerts]           = useState([])
-  const [notifications, setNotifs]    = useState([])
-  const [messageRide, setMessageRide] = useState(null)
+  const [adminMode, setAdminMode]         = useState(true)
+  const [tab, setTab]                     = useState('browse')
+  const [rides, setRides]                 = useState([])
+  const [alerts, setAlerts]               = useState([])
+  const [notifications, setNotifs]        = useState([])
+  const [messageRide, setMessageRide]     = useState(null)
 
   useEffect(() => {
     const unsub = subscribeRides((newRides) => {
@@ -98,8 +93,25 @@ function Dashboard({ user }) {
     .filter(r => r.posterEmail === user.email)
     .reduce((s, r) => s + (r.pendingCount ?? 0), 0)
 
+  if (isAdmin(user.email) && adminMode) {
+    return <Admin user={user} onExitAdmin={() => setAdminMode(false)} />
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Admin switch back button */}
+      {isAdmin(user.email) && (
+        <div className="bg-gray-900 text-white text-xs px-4 py-2 flex items-center justify-between">
+          <span>👤 Viewing as regular user</span>
+          <button
+            onClick={() => setAdminMode(true)}
+            className="bg-brand px-3 py-1 rounded-lg hover:opacity-90"
+          >
+            🛡️ Back to Admin
+          </button>
+        </div>
+      )}
+
       {/* Notification banners */}
       {notifications.length > 0 && (
         <div className="fixed top-12 sm:top-0 left-0 right-0 z-50 flex flex-col gap-1 p-3 pointer-events-none">
@@ -108,7 +120,8 @@ function Dashboard({ user }) {
               className="flex items-center gap-3 bg-brand-light border border-green-300 rounded-xl px-4 py-3 shadow-sm max-w-xl mx-auto w-full pointer-events-auto">
               <span className="text-brand text-base">🔔</span>
               <p className="flex-1 text-sm text-brand-dark">{n.msg}</p>
-              <button onClick={() => dismissNotif(n.id)} className="text-brand-dark opacity-60 hover:opacity-100 text-sm">✕</button>
+              <button onClick={() => dismissNotif(n.id)}
+                className="text-brand-dark opacity-60 hover:opacity-100 text-sm">✕</button>
             </div>
           ))}
         </div>
@@ -123,14 +136,13 @@ function Dashboard({ user }) {
         alertCount={notifications.length}
       />
 
-      {/* Main content — extra bottom padding on mobile for bottom nav */}
       <main className="pb-20 sm:pb-0">
-        {tab === 'browse'    && <Browse     rides={rides} user={user} onMessage={handleMessage} />}
-        {tab === 'post'      && <PostRide   user={user} onSuccess={() => setTab('browse')} />}
-        {tab === 'messages'  && <Messages   user={user} initialRide={messageRide} />}
-        {tab === 'alerts'    && <Alerts     user={user} notifications={notifications} onDismiss={dismissNotif} />}
-        {tab === 'my'        && <MyRides    rides={rides} user={user} />}
-        {tab === 'locations' && <Locations  user={user} />}
+        {tab === 'browse'    && <Browse    rides={rides} user={user} onMessage={handleMessage} />}
+        {tab === 'post'      && <PostRide  user={user} onSuccess={() => setTab('browse')} />}
+        {tab === 'messages'  && <Messages  user={user} initialRide={messageRide} />}
+        {tab === 'alerts'    && <Alerts    user={user} notifications={notifications} onDismiss={dismissNotif} />}
+        {tab === 'my'        && <MyRides   rides={rides} user={user} />}
+        {tab === 'locations' && <Locations user={user} />}
       </main>
     </div>
   )
