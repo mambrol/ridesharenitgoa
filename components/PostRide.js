@@ -62,6 +62,14 @@ export default function PostRide({ user, onSuccess }) {
         note:        form.note,
       })
       setForm(EMPTY)
+      triggerEmailAlerts({
+  from: form.from,
+  to: form.to,
+  posterName: user.displayName || user.email,
+  time: form.time,
+  date: form.date,
+  posterEmail: user.email,
+}).catch(console.error)
       triggerEmailAlerts(rideData).catch(console.error)
       onSuccess()
     } catch (e) {
@@ -159,8 +167,7 @@ export default function PostRide({ user, onSuccess }) {
         <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
           {loading ? 'Publishing…' : '✓ Publish ride'}
         </button>
-        <button className="btn-ghost" onClick={() => setForm(EMPTY)
-      triggerEmailAlerts(rideData).catch(console.error)}>Reset</button>
+       <button className="btn-ghost" onClick={() => setForm(EMPTY)}>Reset</button>
       </div>
     </div>
   )
