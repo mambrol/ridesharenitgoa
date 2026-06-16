@@ -7,7 +7,7 @@ import {
 } from 'firebase/firestore'
 
 export const ADMIN_EMAILS = [
-  'admin@nitgoa.ac.in', // ← replace with your actual admin email
+  'nijin@nitgoa.ac.in', // ← replace with your actual admin email
 ]
 
 export function isAdmin(email) {
