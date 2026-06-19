@@ -34,7 +34,7 @@ export default function PostRide({ user, onSuccess }) {
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
-  async function handleSubmit() {
+ async function handleSubmit() {
     if (!form.from || !form.to || !form.time || !form.date) {
       setError('Please fill in From, To, Time and Date.')
       return
@@ -45,38 +45,40 @@ export default function PostRide({ user, onSuccess }) {
     }
     setError('')
     setLoading(true)
+
+    const rideData = {
+      posterName:  user.displayName || user.email,
+      posterEmail: user.email,
+      vehicle:     form.vehicle,
+      from:        form.from,
+      to:          form.to,
+      route:       form.route || 'Route TBD',
+      time:        form.time,
+      date:        form.date,
+      totalSeats:  Number(form.seats),
+      takenSeats:  0,
+      payment:     form.payment,
+      payNote:     form.payNote,
+      note:        form.note,
+    }
+
     try {
-      await postRide({
-        posterName:  user.displayName || user.email,
-        posterEmail: user.email,
-        vehicle:     form.vehicle,
-        from:        form.from,
-        to:          form.to,
-        route:       form.route || 'Route TBD',
-        time:        form.time,
-        date:        form.date,
-        totalSeats:  Number(form.seats),
-        takenSeats:  0,
-        payment:     form.payment,
-        payNote:     form.payNote,
-        note:        form.note,
-      })
+      await postRide(rideData)
       setForm(EMPTY)
-      triggerEmailAlerts({
-  from: form.from,
-  to: form.to,
-  posterName: user.displayName || user.email,
-  time: form.time,
-  date: form.date,
-  posterEmail: user.email,
-}).catch(console.error)
-      triggerEmailAlerts(rideData).catch(console.error)
       onSuccess()
     } catch (e) {
+      console.error('Post ride error:', e)
       setError('Failed to post ride. Please try again.')
-    } finally {
       setLoading(false)
+      return
     }
+
+    setLoading(false)
+
+    // Send email alerts in the background — never blocks or fails the post
+    triggerEmailAlerts(rideData).catch((e) => {
+      console.error('Email alert error (non-blocking):', e)
+    })
   }
 
   return (
