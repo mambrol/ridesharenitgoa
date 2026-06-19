@@ -24,7 +24,7 @@ export async function POST(request) {
     await transporter.sendMail({
       from: `"NIT Goa RideShare" <${GMAIL_USER}>`,
       to,
-      subject: `🚗 New ride alert: ${rideFrom} → ${rideTo}`,
+      subject: `New ride alert: ${rideFrom} → ${rideTo}`,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
           <div style="background:#1D9E75;border-radius:12px;padding:20px;text-align:center;margin-bottom:24px">
