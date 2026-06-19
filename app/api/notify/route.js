@@ -23,7 +23,7 @@ export async function POST(request) {
 
     if (type === 'route_alert') {
       const { to, rideFrom, rideTo, posterName, time, date } = body
-      subject = `🚗 New ride alert: ${rideFrom} → ${rideTo}`
+      subject = `New ride alert: ${rideFrom} → ${rideTo}`
       html = wrapper(`
         <p style="margin:0 0 12px;font-size:16px;font-weight:600;color:#111">${rideFrom} → ${rideTo}</p>
         <p style="margin:0 0 6px;font-size:14px;color:#555">👤 Posted by: <strong>${posterName}</strong></p>
@@ -35,7 +35,7 @@ export async function POST(request) {
 
     else if (type === 'seat_requested') {
       const { to, requesterName, rideFrom, rideTo, time, date } = body
-      subject = `🪑 New seat request: ${rideFrom} → ${rideTo}`
+      subject = `New seat request: ${rideFrom} → ${rideTo}`
       html = wrapper(`
         <p style="margin:0 0 12px;font-size:16px;font-weight:600;color:#111">${rideFrom} → ${rideTo}</p>
         <p style="margin:0 0 6px;font-size:14px;color:#555">👤 Requested by: <strong>${requesterName}</strong></p>
@@ -54,7 +54,7 @@ export async function POST(request) {
         <p style="margin:0 0 6px;font-size:14px;color:#555">✉️ Driver email: <strong>${driverEmail}</strong></p>
         <p style="margin:0 0 6px;font-size:14px;color:#555">📅 Date: <strong>${date}</strong></p>
         <p style="margin:0;font-size:14px;color:#555">🕐 Time: <strong>${time}</strong></p>
-      `, '🎉 Your seat is confirmed!', 'Open RideShare →')
+      `, ' Your seat is confirmed!', 'Open RideShare →')
       await sendMail(transporter, GMAIL_USER, to, subject, html)
     }
 
@@ -81,7 +81,7 @@ function wrapper(bodyHtml, headerSubtitle, buttonText) {
   return `
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
       <div style="background:#1D9E75;border-radius:12px;padding:20px;text-align:center;margin-bottom:24px">
-        <h1 style="color:white;margin:0;font-size:20px">🚗 NIT Goa RideShare</h1>
+        <h1 style="color:white;margin:0;font-size:20px">NIT Goa RideShare</h1>
         <p style="color:#E1F5EE;margin:8px 0 0;font-size:14px">${headerSubtitle}</p>
       </div>
       <div style="background:#f9f9f9;border-radius:12px;padding:20px;margin-bottom:16px">
