@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { sendRequest, db } from '../lib/firebase'
+import { sendRequest, notifyDriverOfRequest, db } from '../lib/firebase'
 import { format } from 'date-fns'
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
 
