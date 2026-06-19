@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { subscribeRequests, updateRequestStatus, deleteRide, convoId, ensureConversation } from '../lib/firebase'
+import { subscribeRequests, updateRequestStatus, deleteRide, convoId, ensureConversation, notifyRequesterOfDecision } from '../lib/firebase'
 import { format } from 'date-fns'
 
 export default function MyRides({ rides, user, onMessage }) {
@@ -42,9 +42,12 @@ function RideWithRequests({ ride, user, fmtDate, onMessage }) {
   }, [ride.id])
 
   async function handleStatus(reqId, status) {
+    const req = requests.find(r => r.id === reqId)
     await updateRequestStatus(ride.id, reqId, status)
+    if (req) {
+      notifyRequesterOfDecision(req.requesterEmail, ride, status).catch(console.error)
+    }
   }
-
   async function handleDelete() {
     if (!confirm('Delete this ride?')) return
     setDeleting(true)
