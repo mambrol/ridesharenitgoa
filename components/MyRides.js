@@ -1,9 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { subscribeRequests, updateRequestStatus, deleteRide } from '../lib/firebase'
+import { subscribeRequests, updateRequestStatus, deleteRide, convoId, ensureConversation } from '../lib/firebase'
 import { format } from 'date-fns'
 
-export default function MyRides({ rides, user }) {
+export default function MyRides({ rides, user, onMessage }) {
   const myRides = rides.filter(r => r.posterEmail === user.email)
 
   function fmtDate(d, t) {
@@ -23,16 +23,16 @@ export default function MyRides({ rides, user }) {
       )}
 
       {myRides.map((ride) => (
-        <RideWithRequests key={ride.id} ride={ride} user={user} fmtDate={fmtDate} />
+        <RideWithRequests key={ride.id} ride={ride} user={user} fmtDate={fmtDate} onMessage={onMessage} />
       ))}
 
       <h2 className="text-sm font-medium text-gray-900 mb-3 mt-6">Rides I've requested</h2>
-      <RequestedRides rides={rides} user={user} fmtDate={fmtDate} />
+      <RequestedRides rides={rides} user={user} fmtDate={fmtDate} onMessage={onMessage} />
     </div>
   )
 }
 
-function RideWithRequests({ ride, user, fmtDate }) {
+function RideWithRequests({ ride, user, fmtDate, onMessage }) {
   const [requests, setRequests] = useState([])
   const [deleting, setDeleting] = useState(false)
 
@@ -49,6 +49,15 @@ function RideWithRequests({ ride, user, fmtDate }) {
     if (!confirm('Delete this ride?')) return
     setDeleting(true)
     await deleteRide(ride.id)
+  }
+
+  function handleMessageRequester(req) {
+    onMessage({
+      from: ride.from,
+      to: ride.to,
+      posterEmail: req.requesterEmail,
+      posterName: req.requesterName,
+    })
   }
 
   const free = ride.totalSeats - (ride.takenSeats ?? 0)
@@ -97,13 +106,19 @@ function RideWithRequests({ ride, user, fmtDate }) {
                   <p className="text-sm font-medium text-gray-900 truncate">{req.requesterName}</p>
                   <p className="text-xs text-gray-400 truncate">{req.requesterEmail}</p>
                 </div>
+                <button
+                  onClick={() => handleMessageRequester(req)}
+                  className="text-xs px-2 py-1 rounded-lg bg-brand-light text-brand-dark hover:bg-green-100 transition-colors flex-shrink-0"
+                >
+                  💬
+                </button>
                 {req.status === 'pending' ? (
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 flex-shrink-0">
                     <button className="btn-success" onClick={() => handleStatus(req.id, 'accepted')}>✓ Accept</button>
                     <button className="btn-danger"  onClick={() => handleStatus(req.id, 'rejected')}>✕ Reject</button>
                   </div>
                 ) : (
-                  <span className={`status-${req.status}`}>{req.status}</span>
+                  <span className={`status-${req.status} flex-shrink-0`}>{req.status}</span>
                 )}
               </div>
             ))}
@@ -114,7 +129,7 @@ function RideWithRequests({ ride, user, fmtDate }) {
   )
 }
 
-function RequestedRides({ rides, user, fmtDate }) {
+function RequestedRides({ rides, user, fmtDate, onMessage }) {
   const [allRequests, setAllRequests] = useState({})
 
   useEffect(() => {
@@ -162,17 +177,25 @@ function RequestedRides({ rides, user, fmtDate }) {
               </div>
               <span className={`status-${req.status}`}>{req.status}</span>
             </div>
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={() => onMessage(ride)}
+                className="text-xs px-2 py-1 rounded-lg bg-brand-light text-brand-dark hover:bg-green-100 transition-colors"
+              >
+                💬 Message driver
+              </button>
+            </div>
             {req.status === 'accepted' && (
-              <div className="flex items-center gap-2 bg-green-50 rounded-lg px-3 py-2 mt-1">
+              <div className="flex items-center gap-2 bg-green-50 rounded-lg px-3 py-2 mt-2">
                 <span className="text-sm">✉️</span>
                 <p className="text-xs text-green-800">Driver email: <strong>{ride.posterEmail}</strong></p>
               </div>
             )}
             {req.status === 'rejected' && (
-              <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mt-1">Your request was rejected.</p>
+              <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mt-2">Your request was rejected.</p>
             )}
             {req.status === 'pending' && (
-              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mt-1">Waiting for driver confirmation…</p>
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mt-2">Waiting for driver confirmation…</p>
             )}
           </div>
         )
