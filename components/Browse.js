@@ -67,6 +67,7 @@ export default function Browse({ rides, user, onMessage }) {
         requesterName:  user.displayName || user.email,
       })
       setRequested(p => ({ ...p, [ride.id]: true }))
+      notifyDriverOfRequest(ride, user.displayName || user.email).catch(console.error)
     } finally {
       setRequesting(p => ({ ...p, [ride.id]: false }))
     }
