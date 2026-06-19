@@ -141,7 +141,7 @@ function Dashboard({ user }) {
         {tab === 'post'      && <PostRide  user={user} onSuccess={() => setTab('browse')} />}
         {tab === 'messages'  && <Messages  user={user} initialRide={messageRide} />}
         {tab === 'alerts'    && <Alerts    user={user} notifications={notifications} onDismiss={dismissNotif} />}
-        {tab === 'my'        && <MyRides   rides={rides} user={user} />}
+        {tab === 'my'        && <MyRides   rides={rides} user={user} onMessage={handleMessage} />}
         {tab === 'locations' && <Locations user={user} />}
       </main>
     </div>
